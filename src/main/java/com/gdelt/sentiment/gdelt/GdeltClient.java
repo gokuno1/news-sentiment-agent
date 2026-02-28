@@ -39,7 +39,7 @@ public class GdeltClient {
 
     public GdeltClient(String baseUrl, int delaySeconds, int defaultMaxRecords, String defaultTimespan) {
         this.baseUrl = baseUrl == null ? "" : baseUrl.trim().replaceAll("\\?$", "");
-        this.delaySeconds = Math.max(0, delaySeconds);
+        this.delaySeconds = Math.max(10, delaySeconds);
         this.defaultMaxRecords = Math.max(1, defaultMaxRecords);
         this.defaultTimespan = defaultTimespan != null ? defaultTimespan : "1week";
         this.httpClient = HttpClient.newBuilder()
@@ -129,6 +129,7 @@ public class GdeltClient {
         if (timespan != null && !timespan.isBlank()) {
             sb.append("&timespan=").append(URLEncoder.encode(timespan, StandardCharsets.UTF_8));
         }
+        sb.append("&sort=datedesc");
         return sb.toString();
     }
 

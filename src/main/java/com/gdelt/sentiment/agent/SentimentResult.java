@@ -1,7 +1,7 @@
 package com.gdelt.sentiment.agent;
 
 /**
- * Structured output from the SentimentScorer: brief analysis, score, and confidence.
+ * Structured output from the SentimentScorer: detailed analysis, score, and confidence.
  */
 public record SentimentResult(
     String analysis,

@@ -7,14 +7,14 @@ import java.util.logging.Logger;
 
 /**
  * Entrypoint for the GDELT Sentiment AI Agent.
- * Accepts a topic/query and returns brief analysis, sentiment score, and confidence.
+ * Accepts a topic/query and returns detailed analysis, sentiment score, and confidence.
  */
 public class SentimentAgentService {
 
     private static final Logger LOG = Logger.getLogger(SentimentAgentService.class.getName());
 
     public static void main(String[] args) {
-        String query = args.length > 0 ? String.join(" ", args) : "geopolitical tension AND trades";
+        String query = args.length > 0 ? String.join(" ", args) : "geopolitical tension AND Import Export AND tariffs";
         LOG.info("Query: " + query);
 
         SentimentAgentLoop loop = new SentimentAgentLoop();

@@ -38,7 +38,7 @@ public final class AppConfig {
     }
 
     public static int getGdeltDelaySeconds() {
-        return Integer.parseInt(get("gdelt.delaySeconds", "5"));
+        return Integer.parseInt(get("gdelt.delaySeconds", "10"));
     }
 
     public static int getGdeltMaxRecordsPerRequest() {

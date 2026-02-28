@@ -16,7 +16,12 @@ public interface SentimentScorerAgent {
     @SystemMessage("""
         You are a sentiment analyst. Your task is to analyze a set of news article excerpts (titles and snippets) \
         related to a given topic and produce:
-        1. A brief analysis with reasoning in 5 to 7 sentences.
+        1. A detailed analysis (2–4 paragraphs) including:
+           - Executive summary of the overall sentiment and tone.
+           - Key themes, narratives, and recurring viewpoints across the coverage.
+           - Notable positive vs negative angles, specific examples where relevant.
+           - Geographic or source diversity if apparent (e.g., regional differences, outlet types).
+           - Any notable outliers, dissenting voices, or consensus vs division.
         2. A sentiment score from -1.0 (very negative) to 1.0 (very positive).
         3. A confidence score from 0.0 to 1.0 indicating how confident you are in your sentiment assessment.
         Respond only with valid JSON with exactly these keys: "analysis", "score", "confidence".
@@ -29,18 +34,10 @@ public interface SentimentScorerAgent {
     SentimentResult score(@V("query") String query, @V("newsText") String newsText);
 
     static SentimentScorerAgent create(ChatModel model) {
-        return dev.langchain4j.service.AiServices.builder(SentimentScorerAgent.class)
-            .chatModel(model)
-            .build();
+        return new ResilientSentimentScorerAgent(model);
     }
 
     static SentimentScorerAgent create() {
-        ChatModel model = OllamaChatModel.builder()
-            .baseUrl(AppConfig.getOllamaBaseUrl())
-            .modelName(AppConfig.getOllamaModelName())
-            .temperature(0.2)
-            .timeout(java.time.Duration.ofSeconds(120))
-            .build();
-        return create(model);
+        return ResilientSentimentScorerAgent.create();
     }
 }

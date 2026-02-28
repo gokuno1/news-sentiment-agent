@@ -57,12 +57,15 @@ public class SentimentAgentLoop {
                 break;
             }
 
-            // 2. RAG: add only unique, then retrieve top-k
+            // 2. RAG: add only unique (for future runs). Use freshly fetched news for scoring
+            // so we only score articles from the configured timespan (e.g. last 5 days).
+            // RAG retrieval would pull from the persistent store (all historical articles),
+            // which can return older but semantically similar articles and skew results.
             ragService.addNewsOnlyUnique(news);
-            List<String> relevant = ragService.retrieveRelevant(query);
-            if (relevant.isEmpty()) {
-                relevant = news.stream().map(GdeltArticle::getTextForEmbedding).limit(30).collect(Collectors.toList());
-            }
+            List<String> relevant = news.stream()
+                .map(GdeltArticle::getTextForEmbedding)
+                .limit(30)
+                .collect(Collectors.toList());
             String newsText = String.join("\n\n", relevant);
 
             // 3. Score
