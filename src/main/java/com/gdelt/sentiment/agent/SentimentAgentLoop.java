@@ -2,9 +2,11 @@ package com.gdelt.sentiment.agent;
 
 import com.gdelt.sentiment.config.AppConfig;
 import com.gdelt.sentiment.gdelt.GdeltArticle;
+import com.gdelt.sentiment.gdelt.ArticleContentFetcher;
 import com.gdelt.sentiment.rag.NewsRagService;
 
 import java.util.List;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
@@ -21,6 +23,8 @@ public class SentimentAgentLoop {
     private final SentimentScorerAgent scorer;
     private final int maxIterations;
     private final double confidenceThreshold;
+    private final boolean fetchFullContent;
+    private final ArticleContentFetcher contentFetcher;
 
     public SentimentAgentLoop() {
         this(new GdeltFetcherStep(), new NewsRagService(), SentimentScorerAgent.create(),
@@ -34,6 +38,8 @@ public class SentimentAgentLoop {
         this.scorer = scorer;
         this.maxIterations = maxIterations;
         this.confidenceThreshold = confidenceThreshold;
+        this.fetchFullContent = AppConfig.getGdeltFetchFullContent();
+        this.contentFetcher = fetchFullContent ? new ArticleContentFetcher() : null;
     }
 
     /**
@@ -50,11 +56,31 @@ public class SentimentAgentLoop {
             LOG.info("Iteration " + (iteration + 1) + "/" + maxIterations);
 
             // 1. Fetch more (deduplicated)
-            news = fetcher.fetchAndMerge(query, news, iteration);
+            try {
+                news = fetcher.fetchAndMerge(query, news, iteration);
+            } catch (Exception e) {
+                LOG.log(Level.WARNING,
+                    "Fetch step failed (likely connectivity issue). Returning last known sentiment result.",
+                    e);
+                break;
+            }
             if (news.isEmpty()) {
                 LOG.warning("No news retrieved for query: " + query);
                 if (iteration == 0) return last;
                 break;
+            }
+
+            // Optionally enrich with full article content from URLs.
+            if (fetchFullContent && contentFetcher != null) {
+                for (GdeltArticle article : news) {
+                    if (article.getFullContent() == null || article.getFullContent().isBlank()) {
+                        String url = article.getUrl();
+                        String body = contentFetcher.fetchBody(url);
+                        if (body != null && !body.isBlank()) {
+                            article.setFullContent(body);
+                        }
+                    }
+                }
             }
 
             // 2. RAG: add only unique (for future runs). Use freshly fetched news for scoring

@@ -65,6 +65,14 @@ public final class AppConfig {
         return Integer.parseInt(get("rag.topK", "25"));
     }
 
+    public static String getAgentMode() {
+        return get("agent.mode", "pipeline");
+    }
+
+    public static boolean getGdeltFetchFullContent() {
+        return Boolean.parseBoolean(get("gdelt.fetchFullContent", "false"));
+    }
+
     private static String get(String key, String defaultValue) {
         String env = System.getenv(key.replace('.', '_').toUpperCase());
         if (env != null && !env.isBlank()) return env.trim();

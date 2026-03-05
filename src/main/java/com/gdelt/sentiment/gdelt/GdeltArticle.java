@@ -11,6 +11,8 @@ public final class GdeltArticle {
     private final String title;
     private final String url;
     private final String snippet;
+    /** Optional full article content fetched from the article URL. */
+    private String fullContent;
 
     public GdeltArticle(String title, String url, String snippet) {
         this.title = title != null ? title : "";
@@ -32,10 +34,22 @@ public final class GdeltArticle {
 
     /** Text for embedding/display: title + optional snippet. */
     public String getTextForEmbedding() {
-        if (snippet != null && !snippet.isBlank()) {
-            return title + "\n" + snippet;
+        String body = fullContent;
+        if (body == null || body.isBlank()) {
+            body = snippet;
+        }
+        if (body != null && !body.isBlank()) {
+            return title + "\n" + body;
         }
         return title;
+    }
+
+    public String getFullContent() {
+        return fullContent;
+    }
+
+    public void setFullContent(String fullContent) {
+        this.fullContent = fullContent;
     }
 
     @Override
