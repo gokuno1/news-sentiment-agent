@@ -73,6 +73,14 @@ public final class AppConfig {
         return Boolean.parseBoolean(get("gdelt.fetchFullContent", "false"));
     }
 
+    /**
+     * When true, agentic mode adds fetched articles to the embedding store and
+     * retrieves relevant stored segments when scoring (RAG). Default false to preserve existing behavior.
+     */
+    public static boolean getAgenticRagEnabled() {
+        return Boolean.parseBoolean(get("agentic.rag.enabled", "false"));
+    }
+
     private static String get(String key, String defaultValue) {
         String env = System.getenv(key.replace('.', '_').toUpperCase());
         if (env != null && !env.isBlank()) return env.trim();
